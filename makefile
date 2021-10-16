@@ -1,8 +1,7 @@
 UNAME_S = $(shell uname -s)
 
 .PHONY: all
-
-all: run
+all: run clean
 
 build:
 	g++ quasi.cpp
@@ -10,5 +9,6 @@ build:
 run: build
 	./a.out
 
+.PHONY: clean
 clean:
 	rm a.out
