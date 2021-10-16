@@ -4,8 +4,11 @@ UNAME_S = $(shell uname -s)
 
 all: run
 
-hello:
-	echo $(UNAME_S)
+build:
+	g++ quasi.cpp
 
-run: hello
-	echo "we running"
+run: build
+	./a.out
+
+clean:
+	rm a.out
