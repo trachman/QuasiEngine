@@ -1,5 +1,5 @@
 # Sensitive information
-*.env
+.env
 
 # Prerequisites
 *.d
