@@ -1,13 +1,19 @@
 UNAME_S = $(shell uname -s)
 
+CC = g++
+SRC = $(wildcard src/*.cpp)
+
 .PHONY: all
-all: run clean
+all: build
 
 build:
-	g++ quasi.cpp
+	$(CC) $(SRC)
 
 run: build
 	./a.out
+
+test: 
+	echo $(SRC)
 
 .PHONY: clean
 clean:
