@@ -1,20 +1,44 @@
+# operating system
 UNAME_S = $(shell uname -s)
 
+# variables
 CC = g++
+BIN = bin
+ENGINE = engine
 SRC = $(wildcard src/*.cpp)
+OBJ  = $(SRC:.cpp=.o)
 
-.PHONY: all
-all: build
+CFLAGS = -Ilib/glew/include -Ilib/glfw/include
+LDFLAGS = lib/glew/src/glew.c lib/glfw/src/libglfw3.a
+LDFLAGS += -framework OpenGL -framework Cocoa
 
-build:
-	$(CC) $(SRC)
+# targets
+.PHONY: all testing clean
 
-run: build
-	./a.out
+all: dirs libs build # add libs 
 
-test: 
+dirs: 
+	mkdir -p ./$(BIN)
+
+libs:
+	cd lib/glew && make all
+	cd lib/glfw && cmake . && make	
+
+build: $(OBJ)
+	$(CC) -o $(BIN)/$(ENGINE) $^
+
+%.o: %.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+run:
+	$(BIN)/$(ENGINE)
+
+testing: 
 	echo $(SRC)
+	echo $(OBJ)
+	echo $^
+	echo $<
+	echo $@
 
-.PHONY: clean
 clean:
-	rm a.out
+	rm -rf $(BIN) $(OBJ)

@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 int factorial(int n)
 {
 	if (n==1) return 1;
