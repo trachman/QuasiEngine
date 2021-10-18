@@ -1,6 +1,9 @@
 # Sensitive information
 .env
 
+# build
+/bin
+
 # Prerequisites
 *.d
 

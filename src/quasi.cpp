@@ -1,18 +1,39 @@
 #include <iostream>
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-int factorial(int n)
-{
-	if (n==1) return 1;
-	return n*factorial(n-1);
-}
-
 int main()
 {
-	std::cout << "Hello World!" << std::endl;
-	std::cout << "The factorial of 5 is: " << factorial(5) << std::endl;
-	std::cin.get();
+	GLFWwindow* window;
+
+	// initialize the library
+	if (!glfwInit())
+		return -1;
+
+	// create a windowed mode window and context
+	window = glfwCreateWindow(640,480,"Hello World",NULL,NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return -1;
+	}
+
+	// make the current windows context current
+	glfwMakeContextCurrent(window);
+
+	// loop until the user closes the window
+	while(!glfwWindowShouldClose(window))
+	{
+		// render here
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// swap front and back buffers
+		glfwSwapBuffers(window);
+
+		// poll for and process events
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
 	return 0;
 }

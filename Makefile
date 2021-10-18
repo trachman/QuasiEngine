@@ -8,9 +8,8 @@ ENGINE = engine
 SRC = $(wildcard src/*.cpp)
 OBJ  = $(SRC:.cpp=.o)
 
-CFLAGS = -Ilib/glew/include -Ilib/glfw/include
-LDFLAGS = lib/glew/src/glew.c lib/glfw/src/libglfw3.a
-LDFLAGS += -framework OpenGL -framework Cocoa
+CFLAGS = -std=c++11 -Ilib/glew/include -Ilib/glfw/include
+LDFLAGS = -framework Cocoa -framework OpenGL -framework IOKit lib/glfw/src/libglfw3.a #-lm
 
 # targets
 .PHONY: all testing clean
@@ -21,11 +20,11 @@ dirs:
 	mkdir -p ./$(BIN)
 
 libs:
-	cd lib/glew && make all
+	# cd lib/glew && make all
 	cd lib/glfw && cmake . && make	
 
 build: $(OBJ)
-	$(CC) -o $(BIN)/$(ENGINE) $^
+	$(CC) -o $(BIN)/$(ENGINE) $^ $(LDFLAGS)
 
 %.o: %.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
