@@ -8,7 +8,7 @@ ENGINE = engine
 SRC = $(wildcard src/*.cpp)
 OBJ  = $(SRC:.cpp=.o)
 
-CPPFLAGS = -std=c++11 -Ilib/glew/include -Ilib/glfw/include
+CPPFLAGS = -std=c++17 -Ilib/glew/include -Ilib/glfw/include
 # -lm to ldflags was removed, also lib/glew/lib/glew.a file was removed
 LDFLAGS = -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo lib/glew/lib/libGLEW.a lib/glfw/src/libglfw3.a 
 
