@@ -88,8 +88,8 @@ int main()
 
 	// code added from stack overflow directly addressing the cherno's video 
 	// https://stackoverflow.com/questions/62990972/why-is-opengl-giving-me-the-error-error-01-version-330-is-not-support
-  	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // these lines specify the version of opengl ie. 3.3
-  	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // these lines specify the version of opengl ie. 4.1
+  	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // this is necessary on mac
 	// stack overflow code chunk complete
@@ -115,9 +115,15 @@ int main()
 
 	// ModernOpenGl Implemenation
 	float positions[] = {
-		-0.5f, -0.5f,
-		0.0f, 0.5f,
-		0.5f, -0.5f
+		-0.5f, -0.5f, // 0
+		0.5f, -0.5f, // 1
+		0.5f, 0.5f, // 2
+		-0.5f, 0.5f // 3
+	};
+
+	unsigned int indices[] = { 
+		0, 1, 2,
+		2, 3, 0
 	};
 
 	// more stack overflow code
@@ -126,11 +132,17 @@ int main()
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, 6*sizeof(float), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 	// stack overflow code chunk complete 
 	
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
+
+	// generating the index buffer
+	unsigned int ibo;
+	glGenBuffers(1, &ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
 	// parse the shaders
 	std::string vertexShader = ParseShader("res/shaders/vertex.shader");
@@ -146,7 +158,7 @@ int main()
 		// render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 		// swap front and back buffers
 		glfwSwapBuffers(window);
