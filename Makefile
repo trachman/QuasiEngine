@@ -15,7 +15,8 @@ LDFLAGS = -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVid
 # targets
 .PHONY: all testing clean
 
-all: dirs libs build 
+# libs
+all: dirs build run clean
 
 dirs: 
 	mkdir -p ./$(BIN)

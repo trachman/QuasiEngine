@@ -1,8 +1,30 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+// debug purposes
+#include <filesystem>
 
 // glew is used to extract drivers for opengl
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+static std::string ParseShader(const std::string& filepath)
+{
+	// debug realted to filesytem include
+	// std::cout << std::filesystem::current_path() << std::endl;
+
+	std::ifstream stream(filepath);
+
+	std::string line;
+	std::stringstream ss;
+	while (getline(stream, line))
+	{
+		ss << line << '\n';	
+	}
+	return ss.str();
+}
 
 static unsigned int CompileShader(unsigned int type, const std::string& source)
 {
@@ -66,14 +88,10 @@ int main()
 
 	// code added from stack overflow directly addressing the cherno's video 
 	// https://stackoverflow.com/questions/62990972/why-is-opengl-giving-me-the-error-error-01-version-330-is-not-support
-  	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // these lines specify the version of opengl ie. 3.3
   	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-	std::cout << "This is an Apple Computer." << std::endl;
-  	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+  	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // this is necessary on mac
 	// stack overflow code chunk complete
 	
 	// create a windowed mode window and context
@@ -114,27 +132,11 @@ int main()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
 
-	// write the shaders
-	std::string vertexShader = 
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0) in vec4 position;\n"
-		"\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = position;\n"
-		"}\n";
+	// parse the shaders
+	std::string vertexShader = ParseShader("res/shaders/vertex.shader");
+	std::string fragmentShader = ParseShader("res/shaders/fragment.shader");
 
-	std::string fragmentShader = 
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0) out vec4 colour;\n"
-		"\n"
-		"void main()\n"
-		"{\n"
-		"	colour = vec4(1.0, 0.0, 0.0, 1.0);\n"
-		"}\n";
-
+	// create the shaders
 	unsigned int shader = CreateShader(vertexShader, fragmentShader);
 	glUseProgram(shader); // bind the new shaders
 
