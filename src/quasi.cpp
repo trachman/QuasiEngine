@@ -10,6 +10,33 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+/* ERROR HANDLING CODE */
+
+// WHEN YOU WANT TO DEBUG A FUNCTION JUST WRAP
+// IT WITH GLCall(__func__)
+#define ASSERT(x) if (!(x)) exit(1);
+#define GLCall(x) GLClearError();\
+	x;\
+	ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+
+static void GLClearError()
+{
+	while(glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line)
+{
+	while (GLenum error = glGetError())
+	{
+		std::cout << "[OPENGL ERROR] (" << error << ") "
+			<< function << ' ' << file << ':' << line << std::endl;
+		return false;
+	}
+	return true;
+}
+/* END OF ERROR HANDLING */
+
 static std::string ParseShader(const std::string& filepath)
 {
 	// debug realted to filesytem include
@@ -161,6 +188,8 @@ int main()
 		// render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		// debugging example 
+		// GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 		// swap front and back buffers
