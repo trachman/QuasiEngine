@@ -12,7 +12,7 @@ int main()
 	if (!glfwInit())
 		return -1;
 
-	glfwInit(); // why does this work now?
+	glfwInit();
 
 	// create a windowed mode window and context
 	window = glfwCreateWindow(640,480,"Hello World",NULL,NULL);

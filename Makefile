@@ -21,7 +21,7 @@ dirs:
 	mkdir -p ./$(BIN)
 
 libs:
-	cd lib/glew && make all
+	cd lib/glew/auto && make all && cd ../ && make all
 	cd lib/glfw && cmake . && make	
 
 build: $(OBJ)
