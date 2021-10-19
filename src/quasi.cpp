@@ -1,5 +1,4 @@
 #include <iostream>
-
 // glew is used to extract drivers for opengl
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,10 +11,9 @@ int main()
 	if (!glfwInit())
 		return -1;
 
-	glfwInit();
-
 	// create a windowed mode window and context
 	window = glfwCreateWindow(640,480,"Hello World",NULL,NULL);
+
 	if (!window)
 	{
 		glfwTerminate();
@@ -24,6 +22,10 @@ int main()
 
 	// make the current windows context current
 	glfwMakeContextCurrent(window);
+
+	// this line of code must be called after the context
+	if (glewInit() != GLEW_OK)
+		std::cout << "Error occurred with glewInit()" << std::endl;
 
 	// loop until the user closes the window
 	while(!glfwWindowShouldClose(window))
