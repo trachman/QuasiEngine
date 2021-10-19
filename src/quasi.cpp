@@ -132,6 +132,9 @@ int main()
 
 	// make the current windows context current
 	glfwMakeContextCurrent(window);
+	
+	// cap framerate to monitor refresh rate
+	glfwSwapInterval(1); 
 
 	// this line of code must be called after the context
 	if (glewInit() != GLEW_OK)
@@ -182,15 +185,28 @@ int main()
 	unsigned int shader = CreateShader(vertexShader, fragmentShader);
 	glUseProgram(shader); // bind the new shaders
 
+	int location = glGetUniformLocation(shader, "u_Colour");
+	ASSERT(location != -1);
+	glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
+
+	float r = 0.0f;
+	float increment = 0.01f;
 	// loop until the user closes the window
 	while(!glfwWindowShouldClose(window))
 	{
 		// render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		// REMEMBER: uniforms are per draw
+		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
 		// debugging example 
 		// GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	
+		// colour changing 
+		if (r > 1.0f) increment = -0.01f;
+		else if (r < 0.0f) increment = 0.01f;
+		r += increment;
 
 		// swap front and back buffers
 		glfwSwapBuffers(window);
