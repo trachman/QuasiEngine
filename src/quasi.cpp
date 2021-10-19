@@ -114,6 +114,7 @@ int main()
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	// ModernOpenGl Implemenation
+	// coordinates
 	float positions[] = {
 		-0.5f, -0.5f, // 0
 		0.5f, -0.5f, // 1
@@ -121,9 +122,11 @@ int main()
 		-0.5f, 0.5f // 3
 	};
 
+	// determine the coordinates of the positions
+	// array with which to draw the triangles
 	unsigned int indices[] = { 
-		0, 1, 2,
-		2, 3, 0
+		0, 1, 2, // triangle 1
+		2, 3, 0 // triangle 2
 	};
 
 	// more stack overflow code
