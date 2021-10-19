@@ -115,8 +115,8 @@ int main()
 
 	// code added from stack overflow directly addressing the cherno's video 
 	// https://stackoverflow.com/questions/62990972/why-is-opengl-giving-me-the-error-error-01-version-330-is-not-support
-  	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // these lines specify the version of opengl ie. 4.1
-  	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+  	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // these lines specify the version of opengl ie. 4.1
+  	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // this is necessary on mac
 	// stack overflow code chunk complete
@@ -160,15 +160,17 @@ int main()
 	};
 
 	// more stack overflow code
-	unsigned int VBO, VAO;
-	glGenBuffers(1, &VBO);
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	unsigned int buffer, vao;
+	glGenBuffers(1, &buffer);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 	// stack overflow code chunk complete 
-	
+
+	// must always enable before using vertexattribpointer
 	glEnableVertexAttribArray(0);
+	// the below line of code links the vao to the buffer
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
 
 	// generating the index buffer
@@ -189,6 +191,14 @@ int main()
 	ASSERT(location != -1);
 	glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
 
+
+	// unbind buffers
+	glBindVertexArray(0);
+	glUseProgram(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	
+
 	float r = 0.0f;
 	float increment = 0.01f;
 	// loop until the user closes the window
@@ -197,8 +207,15 @@ int main()
 		// render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		// rebind buffers
+		glUseProgram(shader);
+
 		// REMEMBER: uniforms are per draw
 		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
 		// debugging example 
 		// GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -216,8 +233,8 @@ int main()
 	}
 
 	// delete the stack overflow shaders
-	glDeleteVertexArrays(1, &VAO);
-  	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &vao);
+  	glDeleteBuffers(1, &buffer);
   	glDeleteProgram(shader);
 	// stack overflow code chunk complete
 
