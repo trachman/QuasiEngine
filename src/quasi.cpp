@@ -1,4 +1,6 @@
 #include <iostream>
+
+// glew is used to extract drivers for opengl
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -9,6 +11,8 @@ int main()
 	// initialize the library
 	if (!glfwInit())
 		return -1;
+
+	glfwInit(); // why does this work now?
 
 	// create a windowed mode window and context
 	window = glfwCreateWindow(640,480,"Hello World",NULL,NULL);
