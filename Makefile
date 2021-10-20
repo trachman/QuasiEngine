@@ -5,7 +5,7 @@ UNAME_S = $(shell uname -s)
 CC = g++
 BIN = bin
 ENGINE = engine
-SRC = $(wildcard src/*.cpp)
+SRC = $(wildcard src/**/**/*.cpp) $(wildcard src/*.cpp)
 OBJ  = $(SRC:.cpp=.o)
 
 CPPFLAGS = -std=c++17 -Ilib/glew/include -Ilib/glfw/include -Wno-int-to-void-pointer-cast

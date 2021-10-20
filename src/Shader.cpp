@@ -94,6 +94,11 @@ void Shader::Unbind() const
 	glUseProgram(0);
 }
 
+void Shader::SetUniform1i(const std::string& name, int value)
+{
+	int location = GetUniformLocation(name);
+	glUniform1i(location, value);
+}
 
 void Shader::SetUniform4f(const std::string& name, float f1, float f2, float f3, float f4)
 {
@@ -102,7 +107,7 @@ void Shader::SetUniform4f(const std::string& name, float f1, float f2, float f3,
 }
 
 // the helper method to find location
-unsigned int Shader::GetUniformLocation(const std::string& name)
+int Shader::GetUniformLocation(const std::string& name)
 {
 	if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
 		return m_UniformLocationCache[name];

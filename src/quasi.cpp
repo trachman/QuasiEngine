@@ -13,6 +13,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main()
 {
@@ -53,10 +54,10 @@ int main()
 	// ModernOpenGl Implemenation
 	// coordinates
 	float positions[] = {
-		-0.5f, -0.5f, // 0
-		0.5f, -0.5f, // 1
-		0.5f, 0.5f, // 2
-		-0.5f, 0.5f // 3
+		-0.5f, -0.5f, 0.0f, 0.0f, // 0
+		0.5f, -0.5f, 1.0f, 0.0f,// 1
+		0.5f, 0.5f, 1.0f, 1.0f, // 2
+		-0.5f, 0.5f, 0.0f, 1.0f // 3
 	};
 
 	// determine the coordinates of the positions
@@ -66,10 +67,13 @@ int main()
 		2, 3, 0 // triangle 2
 	};
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// initialize the vertex array, vertex buffer, and index buffer
 	VertexArray va;
-	VertexBuffer vb(positions, 4*2*sizeof(float));
+	VertexBuffer vb(positions, 4 * 4 * sizeof(float));
 	VertexBufferLayout layout;
+	layout.Push<float>(2);
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 	IndexBuffer ib(indices, 6);
@@ -80,7 +84,11 @@ int main()
 	s.AddShader(GL_FRAGMENT_SHADER, "res/shaders/fragment.shader");
 	s.CreateShader();
 	s.Bind();
-	s.SetUniform4f("u_Colour", 0.2f, 0.3f, 0.8f, 1.0f);
+	// s.SetUniform4f("u_Colour", 0.2f, 0.3f, 0.8f, 1.0f);
+
+	Texture texture("res/textures/bluedragon.png");
+	texture.Bind();
+	s.SetUniform1i("u_Texture",0);
 
 	// unbind buffers to show that they are still working with opengl
 	va.Unbind();
@@ -98,9 +106,7 @@ int main()
 
 		// rebind buffers
 		s.Bind();
-		s.SetUniform4f("u_Colour", r, 0.3f, 0.8f, 1.0f); // REMEMBER: uniforms are per draw
-		// va.Bind();
-		// ib.Bind();
+		// s.SetUniform4f("u_Colour", r, 0.3f, 0.8f, 1.0f); // REMEMBER: uniforms are per draw
 	
 		renderer.Draw(va, ib, s);
 
