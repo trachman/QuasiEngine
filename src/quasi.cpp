@@ -9,6 +9,7 @@
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
@@ -87,17 +88,21 @@ int main()
 	ib.Unbind();
 	s.Unbind();
 	
+	Renderer renderer;
+
 	float r = 0.0f;
 	float increment = 0.01f;
 	while(!glfwWindowShouldClose(window))
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		renderer.Clear();
 
 		// rebind buffers
 		s.Bind();
 		s.SetUniform4f("u_Colour", r, 0.3f, 0.8f, 1.0f); // REMEMBER: uniforms are per draw
-		va.Bind();
-		ib.Bind();
+		// va.Bind();
+		// ib.Bind();
+	
+		renderer.Draw(va, ib, s);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	
