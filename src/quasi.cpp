@@ -3,45 +3,17 @@
 #include <string>
 #include <sstream>
 
-// debug purposes
-#include <filesystem>
-
 // glew is used to extract drivers for opengl
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-/* ERROR HANDLING CODE */
-
-// WHEN YOU WANT TO DEBUG A FUNCTION JUST WRAP
-// IT WITH GLCall(__func__)
-#define ASSERT(x) if (!(x)) exit(1);
-#define GLCall(x) GLClearError();\
-	x;\
-	ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-
-static void GLClearError()
-{
-	while(glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char* function, const char* file, int line)
-{
-	while (GLenum error = glGetError())
-	{
-		std::cout << "[OPENGL ERROR] (" << error << ") "
-			<< function << ' ' << file << ':' << line << std::endl;
-		return false;
-	}
-	return true;
-}
-/* END OF ERROR HANDLING */
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "VertexArray.h"
 
 static std::string ParseShader(const std::string& filepath)
 {
-	// debug realted to filesytem include
-	// std::cout << std::filesystem::current_path() << std::endl;
-
 	std::ifstream stream(filepath);
 
 	std::string line;
@@ -113,17 +85,13 @@ int main()
 	if (!glfwInit())
 		return -1;
 
-	// code added from stack overflow directly addressing the cherno's video 
-	// https://stackoverflow.com/questions/62990972/why-is-opengl-giving-me-the-error-error-01-version-330-is-not-support
   	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // these lines specify the version of opengl ie. 4.1
   	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // this is necessary on mac
-	// stack overflow code chunk complete
 	
 	// create a windowed mode window and context
 	window = glfwCreateWindow(640,480,"OPENGL TUTORIAL",NULL,NULL);
-
 	if (!window)
 	{
 		glfwTerminate();
@@ -159,31 +127,21 @@ int main()
 		2, 3, 0 // triangle 2
 	};
 
-	// more stack overflow code
-	unsigned int buffer, vao;
-	glGenBuffers(1, &buffer);
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
-	// stack overflow code chunk complete 
+	// initialize the vertex array and vertex buffer 
+	VertexArray va;
+	VertexBuffer vb(positions, 4*2*sizeof(float));
 
-	// must always enable before using vertexattribpointer
-	glEnableVertexAttribArray(0);
-	// the below line of code links the vao to the buffer
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, 0);
+	// new abstracted api to be implemented
+	VertexBufferLayout layout;
+	layout.Push<float>(2);
+	va.AddBuffer(vb, layout);
 
-	// generating the index buffer
-	unsigned int ibo;
-	glGenBuffers(1, &ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+	// initializing the index buffer
+	IndexBuffer ib(indices, 6);
 
-	// parse the shaders
+	// parse and create the shaders
 	std::string vertexShader = ParseShader("res/shaders/vertex.shader");
 	std::string fragmentShader = ParseShader("res/shaders/fragment.shader");
-
-	// create the shaders
 	unsigned int shader = CreateShader(vertexShader, fragmentShader);
 	glUseProgram(shader); // bind the new shaders
 
@@ -191,17 +149,14 @@ int main()
 	ASSERT(location != -1);
 	glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
 
-
 	// unbind buffers
 	glBindVertexArray(0);
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	
-
 	float r = 0.0f;
 	float increment = 0.01f;
-	// loop until the user closes the window
 	while(!glfwWindowShouldClose(window))
 	{
 		// render here
@@ -213,11 +168,11 @@ int main()
 		// REMEMBER: uniforms are per draw
 		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
 
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		// glBindVertexArray(vao);
+		va.Bind();
+		ib.Bind();
 
 		// debugging example 
-		// GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	
 		// colour changing 
@@ -225,18 +180,11 @@ int main()
 		else if (r < 0.0f) increment = 0.01f;
 		r += increment;
 
-		// swap front and back buffers
-		glfwSwapBuffers(window);
-
-		// poll for and process events
-		glfwPollEvents();
+		glfwSwapBuffers(window); // swap front and back buffers
+		glfwPollEvents(); // poll for and process events
 	}
 
-	// delete the stack overflow shaders
-	glDeleteVertexArrays(1, &vao);
-  	glDeleteBuffers(1, &buffer);
   	glDeleteProgram(shader);
-	// stack overflow code chunk complete
 
 	glfwTerminate();
 	return 0;
