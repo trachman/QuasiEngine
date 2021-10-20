@@ -11,71 +11,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
-
-static std::string ParseShader(const std::string& filepath)
-{
-	std::ifstream stream(filepath);
-
-	std::string line;
-	std::stringstream ss;
-	while (getline(stream, line))
-	{
-		ss << line << '\n';	
-	}
-	return ss.str();
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source)
-{
-	unsigned int id = glCreateShader(type);
-	const char* src = source.c_str();
-	glShaderSource(id, 1, &src, nullptr);
-	glCompileShader(id);
-
-	// ERROR HANDLING
-	int result;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-	if (result == GL_FALSE)
-	{
-		int length;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-
-		// below is a c function which allows you to dynamically
-		// allocate to the stack, rather than having to go to 
-		// the heap
-		char* message = (char*) alloca(length*sizeof(char));
-
-		glGetShaderInfoLog(id, length, &length, message);
-		std::cout << "Failed to compile" 
-				  << (type == GL_VERTEX_SHADER ? "vertex" : "fragment")
-				  << " shader." << std::endl;
-		std::cout << message << std::endl;
-		glDeleteShader(id);
-		return 0;
-	}
-	
-	return id;
-}
-	
-// takes in the source code of these two types of shaders
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
-{
-	unsigned int program = glCreateProgram();
-	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
-	glLinkProgram(program);	
-	glValidateProgram(program);
-
-	// since the shaders are apart of the program,
-	// we can get rid of the intermediate shaders
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-
-	return program;
-}
+#include "Shader.h"
 
 int main()
 {
@@ -106,10 +42,12 @@ int main()
 
 	// this line of code must be called after the context
 	if (glewInit() != GLEW_OK)
+	{
 		std::cout << "Error occurred with glewInit()" << std::endl;
+		return 1;
+	}
 
-	// print opengl version
-	std::cout << glGetString(GL_VERSION) << std::endl;
+	std::cout << glGetString(GL_VERSION) << std::endl; // print opengl version
 
 	// ModernOpenGl Implemenation
 	// coordinates
@@ -127,52 +65,40 @@ int main()
 		2, 3, 0 // triangle 2
 	};
 
-	// initialize the vertex array and vertex buffer 
+	// initialize the vertex array, vertex buffer, and index buffer
 	VertexArray va;
 	VertexBuffer vb(positions, 4*2*sizeof(float));
-
-	// new abstracted api to be implemented
 	VertexBufferLayout layout;
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
-
-	// initializing the index buffer
 	IndexBuffer ib(indices, 6);
 
-	// parse and create the shaders
-	std::string vertexShader = ParseShader("res/shaders/vertex.shader");
-	std::string fragmentShader = ParseShader("res/shaders/fragment.shader");
-	unsigned int shader = CreateShader(vertexShader, fragmentShader);
-	glUseProgram(shader); // bind the new shaders
+	// parse and create the shaders/uniforms
+	Shader s;
+	s.AddShader(GL_VERTEX_SHADER, "res/shaders/vertex.shader");
+	s.AddShader(GL_FRAGMENT_SHADER, "res/shaders/fragment.shader");
+	s.CreateShader();
+	s.Bind();
+	s.SetUniform4f("u_Colour", 0.2f, 0.3f, 0.8f, 1.0f);
 
-	int location = glGetUniformLocation(shader, "u_Colour");
-	ASSERT(location != -1);
-	glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
-
-	// unbind buffers
-	glBindVertexArray(0);
-	glUseProgram(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	// unbind buffers to show that they are still working with opengl
+	va.Unbind();
+	vb.Unbind();
+	ib.Unbind();
+	s.Unbind();
 	
 	float r = 0.0f;
 	float increment = 0.01f;
 	while(!glfwWindowShouldClose(window))
 	{
-		// render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// rebind buffers
-		glUseProgram(shader);
-
-		// REMEMBER: uniforms are per draw
-		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
-
-		// glBindVertexArray(vao);
+		s.Bind();
+		s.SetUniform4f("u_Colour", r, 0.3f, 0.8f, 1.0f); // REMEMBER: uniforms are per draw
 		va.Bind();
 		ib.Bind();
 
-		// debugging example 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	
 		// colour changing 
@@ -184,8 +110,8 @@ int main()
 		glfwPollEvents(); // poll for and process events
 	}
 
-  	glDeleteProgram(shader);
-
+	s.Unbind();
 	glfwTerminate();
+
 	return 0;
 }
