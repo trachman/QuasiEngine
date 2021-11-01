@@ -67,7 +67,16 @@ int main()
 		2, 3, 0 // triangle 2
 	};
 
+	/* blending determines how we combine the color 
+	 * we output from our fragment shader (known as 
+	 * source) with what is already in our target
+	 * buffer */
+	// need to enable and disable blending
+	glEnable(GL_BLEND); 
+	// blend function
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// there is also a glBlendEquation() function 
+	// specifies how we combine the source and destination function
 
 	// initialize the vertex array, vertex buffer, and index buffer
 	VertexArray va;
